@@ -9,7 +9,7 @@
 # ///
 """
 QuickBooks MCP Server
-Built by Shane Brady — AI for Business
+Built by Shane Brady — shanebrady.com
 A local-first MCP server that connects Claude Desktop to QuickBooks Online.
 """
 

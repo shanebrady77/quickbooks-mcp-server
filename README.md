@@ -48,6 +48,43 @@ A local-first MCP (Model Context Protocol) server that connects Claude Desktop t
 - **Review write operations** — Claude will ask for confirmation before creating/modifying/deleting records, but always review what's being sent
 - **Localhost only** — the auth helper callback server binds to `localhost:8080` and handles exactly one request, then shuts down
 
+## Important Security Considerations
+
+This server gives Claude **read and write access** to your QuickBooks account. That's powerful — and worth understanding before you connect it to production data.
+
+### Your Financial Data Passes Through AI
+
+When Claude reads your QuickBooks data (invoices, customer emails, revenue, expenses), that data is sent to Anthropic's servers for processing as part of your conversation. Your OAuth tokens stay on your machine, but the financial data Claude pulls **does leave your computer** during the session. Review [Anthropic's data usage policy](https://www.anthropic.com/policies) to understand how your data is handled.
+
+### Write Operations Carry Real Risk
+
+Claude can create invoices, send emails to your customers, record expenses, and delete transactions. A vague or careless prompt could:
+- **Send an incorrect invoice** to a real customer
+- **Email reminders** to the wrong contacts
+- **Create duplicate or miscategorized expenses** that mess up your books at tax time
+- **Delete or void transactions** that are hard to recover
+
+**Always review what Claude is about to do before confirming write actions.** Especially anything that sends emails or modifies records.
+
+### Automations Run Without Supervision
+
+If you set up scheduled tasks (e.g., "every Monday, chase overdue invoices"), those run unattended. If something goes wrong — duplicate sends, wrong amounts, emails to the wrong people — nobody catches it until the damage is done. Start with manual runs and only automate after you trust the output.
+
+### Prompt Injection via Customer Data
+
+If a customer name, invoice memo, or note contains adversarial text (e.g., instructions that try to manipulate the AI), Claude could theoretically act on it when processing that record. This is a known risk with AI systems reading untrusted data.
+
+### Recommendations
+
+1. **Start with sandbox** — set `QUICKBOOKS_ENV=sandbox` and test thoroughly before touching real data
+2. **Read-only first** — use reports and queries before trusting write operations
+3. **Never run on a shared machine** — anyone with access to your `.env` file has full access to your QuickBooks
+4. **Review before sending** — always confirm before Claude sends emails or creates customer-facing documents
+5. **Monitor automations** — check scheduled task outputs regularly, don't set-and-forget
+6. **Rotate credentials** if you suspect exposure — regenerate keys in the [Intuit Developer Portal](https://developer.intuit.com)
+
+---
+
 ## Prerequisites
 
 - Python 3.10+
